@@ -1,20 +1,31 @@
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class ToDoList implements ToDoListFuncs {
 
     private final List<ToDoList> tasks = new ArrayList<>();
-    String text;
-    STATUS status = STATUS.TODO;
 
-    public ToDoList(String text, STATUS status) {
+    private static int counter = 1;
+    private int id;
+    private String text;
+    private STATUS status = STATUS.TODO;
+    private PRIORITY priority = PRIORITY.LOW;
+    private LocalDateTime deadline;
+
+    private Scanner scanner = new Scanner(System.in);
+
+
+    public ToDoList(String text, STATUS status, PRIORITY priority, LocalDateTime deadline) {
+        this.id = counter++;
         this.text = text;
         this.status = status;
+        this.priority = priority;
+        this.deadline = deadline;
     }
 
     public ToDoList() {
     }
-
 
     // helper functions
     private void printHeader(String action) {
@@ -22,39 +33,55 @@ public class ToDoList implements ToDoListFuncs {
     }
 
     public void read() {
-        for (int i = 0; i < tasks.size(); i++) {
-            ToDoList currentItem = tasks.get(i);
-            System.out.println(i + ": " + currentItem.status + " - " + currentItem.text);
+        if (tasks.isEmpty()) {
+            System.out.println("(ingen opgaver)");
+            return;
+        }
+        for (ToDoList t : tasks) {
+            System.out.println(t.id + ": " + t.status + " - " + t.text + " " + t.priority + " - deadline: " + t.deadline);
         }
     }
 
+    private int indexById(int id) {
+        for (int i = 0; i < tasks.size(); i++) {
+            if (tasks.get(i).id == id) {
+                return i;
+            }
+        }
+        throw new IllegalArgumentException("Unknown ID");
+    }
+
+
     public void chooseAction(int x) {
-
-        Scanner scanner = new Scanner(System.in);
-
         switch (x) {
             case 1 -> {
-                printHeader("Add task");
-                String addInput = scanner.nextLine();
-                create(new ToDoList(addInput, STATUS.TODO));
-                System.out.println("Task added successfully.");
+                create();
             }
             case 2 -> {
-                printHeader("View tasks");
                 readGrouped();
             }
             case 3 -> {
                 printHeader("Update task status");
-                read();
-                int updateInput = scanner.nextInt();
-                update(updateInput);
+                readGrouped();
+                int id = scanner.nextInt();
+                scanner.nextLine();
+                update(id);
             }
             case 4 -> {
                 printHeader("Remove task");
-                read();
-                int deleteInput = scanner.nextInt();
-                delete(deleteInput);
+                readGrouped();
+                int id = scanner.nextInt();
+                scanner.nextLine();
+                delete(id);
                 System.out.println("Task removed.");
+            }
+            case 5 -> {
+                printHeader("Update priority");
+                readGrouped();
+                int id = scanner.nextInt();
+                scanner.nextLine();
+                updatePriority(id);
+                System.out.println("Priority updated");
             }
         }
     }
@@ -62,52 +89,129 @@ public class ToDoList implements ToDoListFuncs {
 
     @Override
     public String toString() {
-        return status + " - " + text;
+        return id + ": " + status + " - " + text;
     }
 
 
     @Override
-    public void create(ToDoList x) {
-        tasks.add(x);
+    public void create() {
+
+
+        printHeader("Add task");
+        String addInput = scanner.nextLine();
+
+        printHeader("Choose status");
+        int statusInput = scanner.nextInt();
+
+
+        printHeader("Choose priority");
+        int priorityInput = scanner.nextInt();
+
+        PRIORITY priority = switch (priorityInput) {
+            case 1 -> PRIORITY.LOW;
+            case 2 -> PRIORITY.MEDIUM;
+            case 3 -> PRIORITY.HIGH;
+            default -> throw new IllegalStateException("Unexpected value: " + statusInput);
+        };
+
+        printHeader("Choose deadline");
+        System.out.println("Example: ");
+        LocalDateTime deadline = LocalDateTime.now();
+
+        ToDoList t = new ToDoList(addInput, STATUS.TODO, priority, deadline);
+
+
+        System.out.println(t);
+        System.out.println("Task added successfully.");
+
+        tasks.add(t);
     }
 
     @Override
     public void readGrouped() {
+        printHeader("View tasks");
+
         Map<STATUS, List<ToDoList>> grouped =
                 tasks.stream().collect(Collectors.groupingBy(t -> t.status));
 
-        for (STATUS status : STATUS.values()) {
-            System.out.println("\n" + status + ":");
-            List<ToDoList> list = grouped.getOrDefault(status, List.of());
+        for (STATUS s : STATUS.values()) {
+            System.out.println("\n" + s + ":");
+            List<ToDoList> list = grouped.getOrDefault(s, List.of());
             if (list.isEmpty()) {
+
                 System.out.println("  (ingen opgaver)");
             } else {
-                for (int i = 0; i < list.size(); i++) {
-                    ToDoList t = list.get(i);
-                    System.out.println("  " + (i + 1) + " -> " + t.text);
-                }
+                list.stream()
+                        .sorted(Comparator.comparingInt(t -> t.id))
+                        .forEach(t -> System.out.println("ID: " + t.id + " | TASK: " + t.text + " | PRIO: " + t.priority + " | DEADLINE: " + t.deadline));
+
             }
         }
     }
 
     @Override
     public void update(int x) {
+        ToDoList t = tasks.get(indexById(x));
 
-        ToDoList currentItem = tasks.get(x);
+        System.out.println("you chose to update " + t.text + " with the status of " + t.status);
 
-        System.out.println("you chose to update " + currentItem.text + " with the status of " + currentItem.status);
+        t.status = t.status.next();
 
-        currentItem.status = currentItem.status.next();
-
-        System.out.println("Updated to " + currentItem.status);
+        System.out.println("Updated to " + t.status);
     }
 
     @Override
     public void delete(int x) {
-        tasks.remove(x);
+        ToDoList removed = tasks.remove((indexById(x)));
+        System.out.println("Deleted: " + removed.id + " - " + removed.text);
     }
 
+    @Override
+    public PRIORITY updatePriority(int x) {
+        ToDoList t = tasks.get(indexById(x));
+        System.out.println("Current task has the prio of: " + t.priority);
+        System.out.println("1 is LOW");
+        System.out.println("2 is MEDIUM");
+        System.out.println("3 is HIGH");
+        System.out.println("Update new prio >>>");
+        int userInput = scanner.nextInt();
+        switch (userInput) {
+            case 1:
+                t.priority = PRIORITY.LOW;
+                return PRIORITY.LOW;
+            case 2:
+                t.priority = PRIORITY.MEDIUM;
+                return PRIORITY.LOW;
+            case 3:
+                t.priority = PRIORITY.HIGH;
+                return PRIORITY.HIGH;
+        }
+        System.out.println(t + " has been updated to " + t.priority + " priority");
+        return PRIORITY.LOW;
+    }
 
-
+    @Override
+    public STATUS updateStatus(int x) {
+        ToDoList t = tasks.get(indexById(x));
+        System.out.println("Current task has the prio of: " + t.status);
+        System.out.println("1 is TODO");
+        System.out.println("2 is IN_PROGRESS");
+        System.out.println("3 is DONE");
+        System.out.println("Update new status >>>");
+        int userInput = scanner.nextInt();
+        switch (userInput) {
+            case 1:
+                t.status = STATUS.TODO;
+                return STATUS.TODO;
+            case 2:
+                t.status = STATUS.IN_PROGRESS;
+                return STATUS.IN_PROGRESS;
+            case 3:
+                t.status = STATUS.DONE;
+                return STATUS.DONE;
+        }
+        System.out.println(t + " has been updated to " + t.priority + " priority");
+        return STATUS.TODO;
+    }
 }
 
