@@ -1,70 +1,113 @@
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class ToDoList implements ToDoListFuncs {
 
-    List<String> toDo = new ArrayList<>();
+    private final List<ToDoList> tasks = new ArrayList<>();
+    String text;
+    STATUS status = STATUS.TODO;
+
+    public ToDoList(String text, STATUS status) {
+        this.text = text;
+        this.status = status;
+    }
+
+    public ToDoList() {
+    }
+
+
+    // helper functions
+    private void printHeader(String action) {
+        System.out.println("---- " + action.toUpperCase() + " ----");
+    }
+
+    public void read() {
+        for (int i = 0; i < tasks.size(); i++) {
+            ToDoList currentItem = tasks.get(i);
+            System.out.println(i + ": " + currentItem.status + " - " + currentItem.text);
+        }
+    }
 
     public void chooseAction(int x) {
 
         Scanner scanner = new Scanner(System.in);
 
         switch (x) {
-            case 1:
-                System.out.println("Add to list: >>>");
+            case 1 -> {
+                printHeader("Add task");
                 String addInput = scanner.nextLine();
-                create(addInput);
-                break;
-            case 2:
-                System.out.println("Remove from list: >>>");
-                for (int i = 0; i < toDo.size(); i++) {
-                    System.out.println(i + ": " + toDo.get(i));
-                }
-                int deleteInput = scanner.nextInt();
-                delete(deleteInput);
-                break;
-            case 3:
-                System.out.println("View list: >>>");
-                for (int i = 0; i < toDo.size(); i++) {
-                    System.out.println(i + ": " + toDo.get(i));
-                }
-                break;
-            case 4:
-                System.out.println("Update list status >>>");
-                for (int i = 0; i < toDo.size(); i++) {
-                    System.out.println(i + ": " + toDo.get(i));
-                }
+                create(new ToDoList(addInput, STATUS.TODO));
+                System.out.println("Task added successfully.");
+            }
+            case 2 -> {
+                printHeader("View tasks");
+                readGrouped();
+            }
+            case 3 -> {
+                printHeader("Update task status");
+                read();
                 int updateInput = scanner.nextInt();
                 update(updateInput);
-                break;
+            }
+            case 4 -> {
+                printHeader("Remove task");
+                read();
+                int deleteInput = scanner.nextInt();
+                delete(deleteInput);
+                System.out.println("Task removed.");
+            }
         }
     }
 
 
     @Override
     public String toString() {
-        return "ToDoList{" +
-                "toDo=" + toDo +
-                '}';
+        return status + " - " + text;
+    }
+
+
+    @Override
+    public void create(ToDoList x) {
+        tasks.add(x);
     }
 
     @Override
-    public void create(String x) {
-        toDo.add(x);
-    }
+    public void readGrouped() {
+        Map<STATUS, List<ToDoList>> grouped =
+                tasks.stream().collect(Collectors.groupingBy(t -> t.status));
 
-    @Override
-    public void read(int x) {
+        for (STATUS status : STATUS.values()) {
+            System.out.println("\n" + status + ":");
+            List<ToDoList> list = grouped.getOrDefault(status, List.of());
+            if (list.isEmpty()) {
+                System.out.println("  (ingen opgaver)");
+            } else {
+                for (int i = 0; i < list.size(); i++) {
+                    ToDoList t = list.get(i);
+                    System.out.println("  " + (i + 1) + " -> " + t.text);
+                }
+            }
+        }
     }
 
     @Override
     public void update(int x) {
-        toDo.set(x, toDo.get(x) + " - DONE");
+
+        ToDoList currentItem = tasks.get(x);
+
+        System.out.println("you chose to update " + currentItem.text + " with the status of " + currentItem.status);
+
+        currentItem.status = currentItem.status.next();
+
+        System.out.println("Updated to " + currentItem.status);
     }
 
     @Override
     public void delete(int x) {
-        toDo.remove(x);
+        tasks.remove(x);
     }
+
+
+
 }
+

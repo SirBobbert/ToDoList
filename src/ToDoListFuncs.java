@@ -1,12 +1,9 @@
-import java.util.List;
-
 public interface ToDoListFuncs {
-    void create(String x);
+    void create(ToDoList x);
 
-    void read(int x);
+    void readGrouped();
 
     void update(int x);
 
     void delete(int x);
-
 }
