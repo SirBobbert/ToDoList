@@ -14,6 +14,8 @@ public class Main {
             System.out.println("3 - Update task status");
             System.out.println("4 - Remove task");
             System.out.println("5 - Update priority");
+            System.out.println("6 - View all tasks sorted by deadlines");
+            System.out.println("7 - View all tasks sorted by priority");
             System.out.println("0 - Quit");
             System.out.println("===================================");
 

@@ -51,8 +51,14 @@ public class ToDoList implements ToDoListFuncs {
         throw new IllegalArgumentException("Unknown ID");
     }
 
-
     public void chooseAction(int x) {
+
+        tasks.add(new ToDoList("Køb mælk", STATUS.TODO, PRIORITY.LOW, LocalDateTime.now().plusDays(1)));
+        tasks.add(new ToDoList("Aflever rapport", STATUS.IN_PROGRESS, PRIORITY.HIGH, LocalDateTime.now().plusHours(6)));
+        tasks.add(new ToDoList("Træn i fitness", STATUS.DONE, PRIORITY.MEDIUM, LocalDateTime.now().minusDays(2)));
+        tasks.add(new ToDoList("Lær Java Streams", STATUS.TODO, PRIORITY.HIGH, LocalDateTime.now().plusWeeks(1)));
+        tasks.add(new ToDoList("Book ferie", STATUS.IN_PROGRESS, PRIORITY.LOW, LocalDateTime.now().plusDays(10)));
+
         switch (x) {
             case 1 -> {
                 create();
@@ -82,6 +88,12 @@ public class ToDoList implements ToDoListFuncs {
                 scanner.nextLine();
                 updatePriority(id);
                 System.out.println("Priority updated");
+            }
+            case 6 -> {
+                readSortedDeadlines();
+            }
+            case 7 -> {
+                readSortedPriorities();
             }
         }
     }
@@ -214,6 +226,31 @@ public class ToDoList implements ToDoListFuncs {
         }
         System.out.println(t + " has been updated to " + t.priority + " priority");
         return STATUS.TODO;
+    }
+
+    @Override
+    public void readSortedDeadlines() {
+        //TODO: display entire 'tasks'-array sorted by deadlines
+        System.out.println("Sort array by deadlines");
+
+        tasks.stream()
+                .sorted(Comparator.comparing(t -> t.deadline))
+                .forEach(t -> System.out.println(
+                        t.id + ": " + t.text + " (deadline " + t.deadline.getDayOfMonth() + "/" + t.deadline.getDayOfMonth() + "/" + t.deadline.getYear() + ")"
+                ));
+    }
+
+    @Override
+    public void readSortedPriorities() {
+        //TODO: display entire 'tasks'-array sorted by priorities
+        System.out.println("Sort array by priorities");
+
+
+        tasks.stream()
+                .sorted(Comparator.comparing((ToDoList t) -> t.priority).reversed())
+                .forEach(t -> System.out.println(
+                        t.id + ": " + t.text + " | priority " + t.priority
+                ));
     }
 }
 

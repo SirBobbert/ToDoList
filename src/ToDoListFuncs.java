@@ -10,4 +10,8 @@ public interface ToDoListFuncs {
     PRIORITY updatePriority(int x);
 
     STATUS updateStatus(int x);
+
+    void readSortedDeadlines();
+
+    void readSortedPriorities();
 }
