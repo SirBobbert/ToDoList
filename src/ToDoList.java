@@ -114,6 +114,8 @@ public class ToDoList implements ToDoListFuncs {
             default -> throw new IllegalStateException("Unexpected value: " + statusInput);
         };
 
+
+        // TODO: Add deadline upon creation
         printHeader("Choose deadline");
         System.out.println("Example: ");
         LocalDateTime deadline = LocalDateTime.now();
