@@ -7,7 +7,7 @@ public interface ToDoListFuncs {
 
     void delete(int x);
 
-    PRIORITY updatePriority(int x);
+    void updatePriority(int x);
 
     STATUS updateStatus(int x);
 

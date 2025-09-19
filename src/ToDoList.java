@@ -181,8 +181,15 @@ public class ToDoList implements ToDoListFuncs {
     }
 
     @Override
-    public PRIORITY updatePriority(int x) {
+    public void updatePriority(int x) {
         ToDoList t = tasks.get(indexById(x));
+
+        System.out.println("---------------");
+        System.out.println(t.toString());
+
+        System.out.println(t.priority);
+        System.out.println("---------------");
+
         System.out.println("Current task has the prio of: " + t.priority);
         System.out.println("1 is LOW");
         System.out.println("2 is MEDIUM");
@@ -192,16 +199,20 @@ public class ToDoList implements ToDoListFuncs {
         switch (userInput) {
             case 1:
                 t.priority = PRIORITY.LOW;
-                return PRIORITY.LOW;
-            case 2:
+                break;
+                case 2:
                 t.priority = PRIORITY.MEDIUM;
-                return PRIORITY.LOW;
+                break;
             case 3:
                 t.priority = PRIORITY.HIGH;
-                return PRIORITY.HIGH;
+                break;
         }
+
+        System.out.println("-----------");
+        System.out.println(t.priority);
+        System.out.println("-----------");
+
         System.out.println(t + " has been updated to " + t.priority + " priority");
-        return PRIORITY.LOW;
     }
 
     @Override
