@@ -1,5 +1,6 @@
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -12,12 +13,12 @@ public class ToDoList implements ToDoListFuncs {
     private String text;
     private STATUS status = STATUS.TODO;
     private PRIORITY priority = PRIORITY.LOW;
-    private LocalDateTime deadline;
+    private LocalDate deadline;
 
     private final Scanner SCANNER = new Scanner(System.in);
 
 
-    public ToDoList(String text, STATUS status, PRIORITY priority, LocalDateTime deadline) {
+    public ToDoList(String text, STATUS status, PRIORITY priority, LocalDate deadline) {
         this.id = counter++;
         this.text = text;
         this.status = status;
@@ -44,11 +45,13 @@ public class ToDoList implements ToDoListFuncs {
 
     public void chooseAction(int x) {
         checkForOldDeadlines();
-        TASKS.add(new ToDoList("Køb mælk", STATUS.TODO, PRIORITY.LOW, LocalDateTime.now().plusDays(1)));
-        TASKS.add(new ToDoList("Aflever rapport", STATUS.IN_PROGRESS, PRIORITY.HIGH, LocalDateTime.now().plusHours(6)));
-        TASKS.add(new ToDoList("Træn i fitness", STATUS.DONE, PRIORITY.MEDIUM, LocalDateTime.now().minusDays(2)));
-        TASKS.add(new ToDoList("Lær Java Streams", STATUS.TODO, PRIORITY.HIGH, LocalDateTime.now().plusWeeks(1)));
-        TASKS.add(new ToDoList("Book ferie", STATUS.IN_PROGRESS, PRIORITY.LOW, LocalDateTime.now().plusDays(10)));
+
+        //TODO: Remove dummy data
+//        TASKS.add(new ToDoList("Køb mælk", STATUS.TODO, PRIORITY.LOW, LocalDateTime.now().plusDays(1)));
+//        TASKS.add(new ToDoList("Aflever rapport", STATUS.IN_PROGRESS, PRIORITY.HIGH, LocalDateTime.now().plusHours(6)));
+//        TASKS.add(new ToDoList("Træn i fitness", STATUS.DONE, PRIORITY.MEDIUM, LocalDateTime.now().minusDays(2)));
+//        TASKS.add(new ToDoList("Lær Java Streams", STATUS.TODO, PRIORITY.HIGH, LocalDateTime.now().plusWeeks(1)));
+//        TASKS.add(new ToDoList("Book ferie", STATUS.IN_PROGRESS, PRIORITY.LOW, LocalDateTime.now().plusDays(10)));
 
         switch (x) {
             case 1 -> {
@@ -118,18 +121,20 @@ public class ToDoList implements ToDoListFuncs {
         };
 
 
-        // TODO: Add deadline upon creation
         printHeader("Choose deadline");
-        System.out.println("Example: ");
-        LocalDateTime deadline = LocalDateTime.now();
-        ToDoList t = new ToDoList(addInput, STATUS.TODO, priority, deadline);
-        System.out.println(t);
-        System.out.println("Task added successfully.");
+        System.out.println("Example: dd-mm-yyyy");
+        // scanner bug
+        String str = SCANNER.nextLine();
+        String test = SCANNER.nextLine();
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        ToDoList t = new ToDoList(addInput, STATUS.TODO, priority, LocalDate.parse(test, dtf));
         TASKS.add(t);
+        System.out.println("Task added successfully.");
     }
 
     @Override
     public void readGrouped() {
+        // TODO: Add deadline upon creation
         printHeader("View tasks");
         Map<STATUS, List<ToDoList>> grouped =
                 TASKS.stream().collect(Collectors.groupingBy(t -> t.status));
@@ -217,7 +222,6 @@ public class ToDoList implements ToDoListFuncs {
 
     @Override
     public void readSortedDeadlines() {
-        //TODO: display entire 'tasks'-array sorted by deadlines
         System.out.println("Sort array by deadlines");
 
         TASKS.stream()
@@ -229,7 +233,6 @@ public class ToDoList implements ToDoListFuncs {
 
     @Override
     public void readSortedPriorities() {
-        //TODO: display entire 'tasks'-array sorted by priorities
         System.out.println("Sort array by priorities");
 
         TASKS.stream()
@@ -241,15 +244,15 @@ public class ToDoList implements ToDoListFuncs {
 
     @Override
     public void checkForOldDeadlines() {
-
+        printHeader("Old deadlines");
         for (ToDoList t : TASKS) {
-            if (t.deadline.isBefore(LocalDateTime.now())) {
+            if (t.deadline.isBefore(LocalDate.now())) {
 
                 TASKS.stream()
-                        .sorted(Comparator.comparing(y -> t.deadline.isBefore(LocalDateTime.now())))
+                        .sorted(Comparator.comparing(y -> t.deadline.isBefore(LocalDate.now())))
                         .forEach(y -> System.out.println(
 
-                                t.id + ": " + t.text + " (deadline " + t.deadline.getDayOfMonth() + "/" + t.deadline.getDayOfMonth() + "/" + t.deadline.getYear() + ")" + " | overskredet med " + t.deadline.compareTo(LocalDate.now().atStartOfDay()) + " dage"
+                                t.id + ": " + t.text + " (deadline " + t.deadline.getDayOfMonth() + "/" + t.deadline.getDayOfMonth() + "/" + t.deadline.getYear() + ")"
                         ));
             }
         }
@@ -275,7 +278,7 @@ public class ToDoList implements ToDoListFuncs {
         return priority;
     }
 
-    public LocalDateTime getDeadline() {
+    public LocalDate getDeadline() {
         return deadline;
     }
 }
