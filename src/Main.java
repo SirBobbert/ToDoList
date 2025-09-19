@@ -1,13 +1,15 @@
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
 
-        ToDoList toDoList = new ToDoList();
         Scanner scanner = new Scanner(System.in);
+        ToDoList toDoList = new ToDoList();
+
 
         while (true) {
-            //TODO: Failsafe userinput
+            //TODO: Failsafe user input
             System.out.println("============ TO DO APP ============");
             System.out.println("1 - Add task");
             System.out.println("2 - View all tasks");
@@ -20,16 +22,22 @@ public class Main {
             System.out.println("9 - Sorts by priority then deadlines");
             System.out.println("0 - Quit");
             System.out.println("===================================");
+            try {
 
-            int userInput = scanner.nextInt();
+                int userInput = scanner.nextInt();
 
-            if (userInput == 0) {
-                System.out.println("Shutting down...");
-                break;
+                if (userInput == 0) {
+                    System.out.println("Shutting down...");
+                    break;
+                }
+
+                //TODO: fix the way we initialize ToDoList-class here
+                toDoList.chooseAction(userInput);
+
+            } catch (Exception e) {
+                System.out.println("Invalid input - Main");
+                scanner.nextLine();
             }
-
-            toDoList.chooseAction(userInput);
         }
-
     }
 }
