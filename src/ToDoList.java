@@ -1,5 +1,4 @@
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -16,6 +15,15 @@ public class ToDoList implements ToDoListFuncs {
     private LocalDate deadline;
 
     private final Scanner SCANNER = new Scanner(System.in);
+
+    public void addDummyData() {
+        // TODO: Remove dummy data
+        TASKS.add(new ToDoList("Køb mælk", STATUS.TODO, PRIORITY.LOW, LocalDate.now().plusDays(1)));
+        TASKS.add(new ToDoList("Aflever rapport", STATUS.IN_PROGRESS, PRIORITY.HIGH, LocalDate.now()));
+        TASKS.add(new ToDoList("Træn i fitness", STATUS.DONE, PRIORITY.MEDIUM, LocalDate.now().minusDays(2)));
+        TASKS.add(new ToDoList("Lær Java Streams", STATUS.TODO, PRIORITY.HIGH, LocalDate.now().plusWeeks(1)));
+        TASKS.add(new ToDoList("Book ferie", STATUS.IN_PROGRESS, PRIORITY.LOW, LocalDate.now().plusDays(10)));
+    }
 
 
     public ToDoList(String text, STATUS status, PRIORITY priority, LocalDate deadline) {
@@ -43,15 +51,20 @@ public class ToDoList implements ToDoListFuncs {
         throw new IllegalArgumentException("Unknown ID");
     }
 
-    public void chooseAction(int x) {
-        checkForOldDeadlines();
+    private void printPriorities() {
 
-        //TODO: Remove dummy data
-//        TASKS.add(new ToDoList("Køb mælk", STATUS.TODO, PRIORITY.LOW, LocalDateTime.now().plusDays(1)));
-//        TASKS.add(new ToDoList("Aflever rapport", STATUS.IN_PROGRESS, PRIORITY.HIGH, LocalDateTime.now().plusHours(6)));
-//        TASKS.add(new ToDoList("Træn i fitness", STATUS.DONE, PRIORITY.MEDIUM, LocalDateTime.now().minusDays(2)));
-//        TASKS.add(new ToDoList("Lær Java Streams", STATUS.TODO, PRIORITY.HIGH, LocalDateTime.now().plusWeeks(1)));
-//        TASKS.add(new ToDoList("Book ferie", STATUS.IN_PROGRESS, PRIORITY.LOW, LocalDateTime.now().plusDays(10)));
+        for (int i = 0; i < PRIORITY.values().length; i++) {
+            System.out.println(i + 1 + ":" + PRIORITY.values()[i]);
+        }
+    }
+
+    private void printStatuses() {
+        for (int i = 0; i < STATUS.values().length; i++) {
+            System.out.println(i + 1 + ":" + STATUS.values()[i]);
+        }
+    }
+
+    public void chooseAction(int x) {
 
         switch (x) {
             case 1 -> {
@@ -108,27 +121,38 @@ public class ToDoList implements ToDoListFuncs {
     @Override
     public void create() {
         printHeader("Add task");
-        String addInput = SCANNER.nextLine();
-        printHeader("Choose status");
-        int statusInput = SCANNER.nextInt();
+        System.out.println("Name of the task: >>>");
+        String taskName = SCANNER.nextLine();
         printHeader("Choose priority");
-        int priorityInput = SCANNER.nextInt();
-        PRIORITY priority = switch (priorityInput) {
+        printPriorities();
+        int taskPriority = SCANNER.nextInt();
+
+        PRIORITY priority = switch (taskPriority) {
             case 1 -> PRIORITY.LOW;
             case 2 -> PRIORITY.MEDIUM;
             case 3 -> PRIORITY.HIGH;
-            default -> throw new IllegalStateException("Unexpected value: " + statusInput);
+            default -> throw new IllegalStateException("Unexpected value: " + taskPriority);
         };
 
 
         printHeader("Choose deadline");
         System.out.println("Example: dd-mm-yyyy");
-        // scanner bug
+
+        //scanner bug
         String str = SCANNER.nextLine();
+
         String test = SCANNER.nextLine();
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-        ToDoList t = new ToDoList(addInput, STATUS.TODO, priority, LocalDate.parse(test, dtf));
-        TASKS.add(t);
+
+        if (test.isEmpty()) {
+            deadline = LocalDate.now();
+        } else {
+            deadline = LocalDate.parse(test, dtf);
+        }
+
+        ToDoList newTask = new ToDoList(taskName, STATUS.TODO, priority, deadline);
+        TASKS.add(newTask);
+        System.out.println(newTask.toString());
         System.out.println("Task added successfully.");
     }
 
@@ -147,7 +171,7 @@ public class ToDoList implements ToDoListFuncs {
             } else {
                 list.stream()
                         .sorted(Comparator.comparingInt(t -> t.id))
-                        .forEach(t -> System.out.println("ID: " + t.id + " | TASK: " + t.text + " | PRIO: " + t.priority + " | DEADLINE: " + t.deadline));
+                        .forEach(t -> System.out.println("ID: " + t.id + " | TASK: " + t.text + " | PRIO: " + t.priority + " | STATUS: " + t.status + " | DEADLINE: " + t.deadline));
             }
         }
     }
