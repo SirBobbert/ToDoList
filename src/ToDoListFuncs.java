@@ -3,13 +3,11 @@ public interface ToDoListFuncs {
 
     void readGrouped();
 
-    void update(int x);
+    void update();
 
-    void delete(int x);
+    void delete();
 
-    void updatePriority(int x);
-
-    STATUS updateStatus(int x);
+    void updatePriority();
 
     void readSortedDeadlines();
 

@@ -66,35 +66,26 @@ public class ToDoList implements ToDoListFuncs {
 
     public void chooseAction(int x) {
 
+        addDummyData();
+
         switch (x) {
             case 1 -> {
                 create();
             }
             case 2 -> {
+                printHeader("View tasks");
+
                 readGrouped();
             }
             case 3 -> {
-                printHeader("Update task status");
-                readGrouped();
-                int id = SCANNER.nextInt();
-                SCANNER.nextLine();
-                update(id);
+                update();
             }
             case 4 -> {
-                printHeader("Remove task");
-                readGrouped();
-                int id = SCANNER.nextInt();
-                SCANNER.nextLine();
-                delete(id);
-                System.out.println("Task removed.");
+                delete();
             }
             case 5 -> {
-                printHeader("Update priority");
-                readGrouped();
-                int id = SCANNER.nextInt();
-                SCANNER.nextLine();
-                updatePriority(id);
-                System.out.println("Priority updated");
+
+                updatePriority();
             }
             case 6 -> {
                 readSortedDeadlines();
@@ -111,12 +102,17 @@ public class ToDoList implements ToDoListFuncs {
         }
     }
 
-    //TODO: Update toString?
     @Override
     public String toString() {
-        return id + ": " + status + " - " + text;
+        return "ToDoList{" +
+                "TASKS=" + TASKS +
+                ", id=" + id +
+                ", text='" + text + '\'' +
+                ", status=" + status +
+                ", priority=" + priority +
+                ", deadline=" + deadline +
+                '}';
     }
-
 
     @Override
     public void create() {
@@ -152,59 +148,74 @@ public class ToDoList implements ToDoListFuncs {
 
         ToDoList newTask = new ToDoList(taskName, STATUS.TODO, priority, deadline);
         TASKS.add(newTask);
-        System.out.println(newTask.toString());
+        System.out.println(newTask);
         System.out.println("Task added successfully.");
     }
 
     @Override
     public void readGrouped() {
-        // TODO: Add deadline upon creation
-        printHeader("View tasks");
-        Map<STATUS, List<ToDoList>> grouped =
-                TASKS.stream().collect(Collectors.groupingBy(t -> t.status));
-        for (STATUS s : STATUS.values()) {
-            System.out.println("\n" + s + ":");
-            List<ToDoList> list = grouped.getOrDefault(s, List.of());
-            if (list.isEmpty()) {
 
-                System.out.println("  (ingen opgaver)");
-            } else {
-                list.stream()
-                        .sorted(Comparator.comparingInt(t -> t.id))
-                        .forEach(t -> System.out.println("ID: " + t.id + " | TASK: " + t.text + " | PRIO: " + t.priority + " | STATUS: " + t.status + " | DEADLINE: " + t.deadline));
+        if (TASKS.isEmpty()) {
+            printHeader("Task list is empty");
+        } else {
+
+
+            Map<STATUS, List<ToDoList>> grouped =
+                    TASKS.stream().collect(Collectors.groupingBy(t -> t.status));
+
+            for (STATUS s : STATUS.values()) {
+                System.out.println("\n" + s + ":");
+                List<ToDoList> list = grouped.getOrDefault(s, List.of());
+                if (list.isEmpty()) {
+                    System.out.println("(ingen opgaver)");
+                } else {
+                    list.stream()
+                            .sorted(Comparator.comparingInt(t -> t.id))
+                            .forEach(System.out::println);
+                }
             }
         }
     }
 
     @Override
-    public void update(int x) {
-        ToDoList t = TASKS.get(indexById(x));
-        System.out.println("you chose to update " + t.text + " with the status of " + t.status);
+    public void update() {
+        printHeader("Update task status");
+        System.out.println("Pick task based on id: >>>");
+        readGrouped();
+
+        int id = SCANNER.nextInt();
+        ToDoList t = TASKS.get(indexById(id));
+
         t.status = t.status.next();
-        System.out.println("Updated to " + t.status);
+        System.out.println("The task: " + t.text + " has been updated to " + t.status);
     }
 
     @Override
-    public void delete(int x) {
-        ToDoList removed = TASKS.remove((indexById(x)));
-        System.out.println("Deleted: " + removed.id + " - " + removed.text);
+    public void delete() {
+        printHeader("Remove task");
+        System.out.println("Remove task based on id: >>>");
+        readGrouped();
+
+        int id = SCANNER.nextInt();
+        ToDoList removed = TASKS.remove((indexById(id)));
+
+        System.out.println("The task: " + removed.text + " has successfully been removed");
     }
 
     @Override
-    public void updatePriority(int x) {
-        ToDoList t = TASKS.get(indexById(x));
+    public void updatePriority() {
+        printHeader("Update priority");
+        System.out.println("Update priority based on id: >>>");
+        readGrouped();
 
-        System.out.println("---------------");
-        System.out.println(t.toString());
 
-        System.out.println(t.priority);
-        System.out.println("---------------");
+        int id = SCANNER.nextInt();
+        ToDoList t = TASKS.get(indexById(id));
 
-        System.out.println("Current task has the prio of: " + t.priority);
-        System.out.println("1 is LOW");
-        System.out.println("2 is MEDIUM");
-        System.out.println("3 is HIGH");
-        System.out.println("Update new prio >>>");
+        System.out.println("Current task has the priority of: " + t.priority);
+        System.out.println("Choose new priority based on id: >>>");
+        printPriorities();
+
         int userInput = SCANNER.nextInt();
         switch (userInput) {
             case 1:
@@ -217,73 +228,42 @@ public class ToDoList implements ToDoListFuncs {
                 t.priority = PRIORITY.HIGH;
                 break;
         }
-        System.out.println(t + " has been updated to " + t.priority + " priority");
-    }
 
-    @Override
-    public STATUS updateStatus(int x) {
-        ToDoList t = TASKS.get(indexById(x));
-        System.out.println("Current task has the prio of: " + t.status);
-        System.out.println("1 is TODO");
-        System.out.println("2 is IN_PROGRESS");
-        System.out.println("3 is DONE");
-        System.out.println("Update new status >>>");
-        int userInput = SCANNER.nextInt();
-        switch (userInput) {
-            case 1:
-                t.status = STATUS.TODO;
-                return STATUS.TODO;
-            case 2:
-                t.status = STATUS.IN_PROGRESS;
-                return STATUS.IN_PROGRESS;
-            case 3:
-                t.status = STATUS.DONE;
-                return STATUS.DONE;
-        }
-        System.out.println(t + " has been updated to " + t.priority + " priority");
-        return STATUS.TODO;
+        System.out.println("The task: " + t.text + " has been updated to " + t.priority);
     }
 
     @Override
     public void readSortedDeadlines() {
-        System.out.println("Sort array by deadlines");
+        printHeader("Sort array by deadlines");
 
         TASKS.stream()
                 .sorted(Comparator.comparing(t -> t.deadline))
-                .forEach(t -> System.out.println(
-                        t.id + ": " + t.text + " (deadline " + t.deadline.getDayOfMonth() + "/" + t.deadline.getDayOfMonth() + "/" + t.deadline.getYear() + ")"
-                ));
+                .forEach(System.out::println);
     }
 
     @Override
     public void readSortedPriorities() {
-        System.out.println("Sort array by priorities");
+        printHeader("Sort array by priorities");
 
         TASKS.stream()
                 .sorted(Comparator.comparing((ToDoList t) -> t.priority).reversed())
-                .forEach(t -> System.out.println(
-                        t.id + ": " + t.text + " | priority " + t.priority
-                ));
+                .forEach(System.out::println);
     }
 
     @Override
     public void checkForOldDeadlines() {
-        printHeader("Old deadlines");
-        for (ToDoList t : TASKS) {
-            if (t.deadline.isBefore(LocalDate.now())) {
+        printHeader("Passed deadlines");
 
-                TASKS.stream()
-                        .sorted(Comparator.comparing(y -> t.deadline.isBefore(LocalDate.now())))
-                        .forEach(y -> System.out.println(
-
-                                t.id + ": " + t.text + " (deadline " + t.deadline.getDayOfMonth() + "/" + t.deadline.getDayOfMonth() + "/" + t.deadline.getYear() + ")"
-                        ));
-            }
-        }
+        TASKS.stream()
+                .filter(x -> x.deadline.isBefore(LocalDate.now()))
+                .sorted(Comparator.comparing(ToDoList::getDeadline))
+                .forEach(System.out::println);
     }
 
     @Override
     public void sortByPriorityThenDeadline() {
+        // doesn't show passed deadlines
+        TASKS.stream().filter(x -> x.deadline.isBefore(LocalDate.now()));
 
         TASKS.sort(Comparator
                 .comparing(ToDoList::getPriority).reversed()
@@ -291,11 +271,8 @@ public class ToDoList implements ToDoListFuncs {
         );
 
         for (ToDoList t : TASKS) {
-            TASKS.forEach(y -> System.out.println(
-                    "ID: " + t.id + " | " + t.text + " | DEADLINE " + t.deadline.getDayOfMonth() + "/" + t.deadline.getDayOfMonth() + "/" + t.deadline.getYear() + " | PRIO: " + t.priority
-            ));
+            System.out.println(t.toString());
         }
-
     }
 
     public PRIORITY getPriority() {

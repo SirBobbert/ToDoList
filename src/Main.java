@@ -7,7 +7,7 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
 
         while (true) {
-
+            //TODO: Failsafe userinput
             System.out.println("============ TO DO APP ============");
             System.out.println("1 - Add task");
             System.out.println("2 - View all tasks");
