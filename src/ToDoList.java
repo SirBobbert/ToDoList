@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 
 public class ToDoList implements ToDoListFuncs {
 
-    private final List<ToDoList> tasks = new ArrayList<>();
+    private final List<ToDoList> TASKS = new ArrayList<>();
 
     private static int counter = 1;
     private int id;
@@ -14,7 +14,7 @@ public class ToDoList implements ToDoListFuncs {
     private PRIORITY priority = PRIORITY.LOW;
     private LocalDateTime deadline;
 
-    private Scanner scanner = new Scanner(System.in);
+    private final Scanner SCANNER = new Scanner(System.in);
 
 
     public ToDoList(String text, STATUS status, PRIORITY priority, LocalDateTime deadline) {
@@ -34,8 +34,8 @@ public class ToDoList implements ToDoListFuncs {
     }
 
     private int indexById(int id) {
-        for (int i = 0; i < tasks.size(); i++) {
-            if (tasks.get(i).id == id) {
+        for (int i = 0; i < TASKS.size(); i++) {
+            if (TASKS.get(i).id == id) {
                 return i;
             }
         }
@@ -44,11 +44,11 @@ public class ToDoList implements ToDoListFuncs {
 
     public void chooseAction(int x) {
         checkForOldDeadlines();
-        tasks.add(new ToDoList("Køb mælk", STATUS.TODO, PRIORITY.LOW, LocalDateTime.now().plusDays(1)));
-        tasks.add(new ToDoList("Aflever rapport", STATUS.IN_PROGRESS, PRIORITY.HIGH, LocalDateTime.now().plusHours(6)));
-        tasks.add(new ToDoList("Træn i fitness", STATUS.DONE, PRIORITY.MEDIUM, LocalDateTime.now().minusDays(2)));
-        tasks.add(new ToDoList("Lær Java Streams", STATUS.TODO, PRIORITY.HIGH, LocalDateTime.now().plusWeeks(1)));
-        tasks.add(new ToDoList("Book ferie", STATUS.IN_PROGRESS, PRIORITY.LOW, LocalDateTime.now().plusDays(10)));
+        TASKS.add(new ToDoList("Køb mælk", STATUS.TODO, PRIORITY.LOW, LocalDateTime.now().plusDays(1)));
+        TASKS.add(new ToDoList("Aflever rapport", STATUS.IN_PROGRESS, PRIORITY.HIGH, LocalDateTime.now().plusHours(6)));
+        TASKS.add(new ToDoList("Træn i fitness", STATUS.DONE, PRIORITY.MEDIUM, LocalDateTime.now().minusDays(2)));
+        TASKS.add(new ToDoList("Lær Java Streams", STATUS.TODO, PRIORITY.HIGH, LocalDateTime.now().plusWeeks(1)));
+        TASKS.add(new ToDoList("Book ferie", STATUS.IN_PROGRESS, PRIORITY.LOW, LocalDateTime.now().plusDays(10)));
 
         switch (x) {
             case 1 -> {
@@ -60,23 +60,23 @@ public class ToDoList implements ToDoListFuncs {
             case 3 -> {
                 printHeader("Update task status");
                 readGrouped();
-                int id = scanner.nextInt();
-                scanner.nextLine();
+                int id = SCANNER.nextInt();
+                SCANNER.nextLine();
                 update(id);
             }
             case 4 -> {
                 printHeader("Remove task");
                 readGrouped();
-                int id = scanner.nextInt();
-                scanner.nextLine();
+                int id = SCANNER.nextInt();
+                SCANNER.nextLine();
                 delete(id);
                 System.out.println("Task removed.");
             }
             case 5 -> {
                 printHeader("Update priority");
                 readGrouped();
-                int id = scanner.nextInt();
-                scanner.nextLine();
+                int id = SCANNER.nextInt();
+                SCANNER.nextLine();
                 updatePriority(id);
                 System.out.println("Priority updated");
             }
@@ -92,11 +92,10 @@ public class ToDoList implements ToDoListFuncs {
             case 9 -> {
                 sortByPriorityThenDeadline();
             }
-
         }
     }
 
-
+    //TODO: Update toString?
     @Override
     public String toString() {
         return id + ": " + status + " - " + text;
@@ -105,18 +104,12 @@ public class ToDoList implements ToDoListFuncs {
 
     @Override
     public void create() {
-
-
         printHeader("Add task");
-        String addInput = scanner.nextLine();
-
+        String addInput = SCANNER.nextLine();
         printHeader("Choose status");
-        int statusInput = scanner.nextInt();
-
-
+        int statusInput = SCANNER.nextInt();
         printHeader("Choose priority");
-        int priorityInput = scanner.nextInt();
-
+        int priorityInput = SCANNER.nextInt();
         PRIORITY priority = switch (priorityInput) {
             case 1 -> PRIORITY.LOW;
             case 2 -> PRIORITY.MEDIUM;
@@ -129,23 +122,17 @@ public class ToDoList implements ToDoListFuncs {
         printHeader("Choose deadline");
         System.out.println("Example: ");
         LocalDateTime deadline = LocalDateTime.now();
-
         ToDoList t = new ToDoList(addInput, STATUS.TODO, priority, deadline);
-
-
         System.out.println(t);
         System.out.println("Task added successfully.");
-
-        tasks.add(t);
+        TASKS.add(t);
     }
 
     @Override
     public void readGrouped() {
         printHeader("View tasks");
-
         Map<STATUS, List<ToDoList>> grouped =
-                tasks.stream().collect(Collectors.groupingBy(t -> t.status));
-
+                TASKS.stream().collect(Collectors.groupingBy(t -> t.status));
         for (STATUS s : STATUS.values()) {
             System.out.println("\n" + s + ":");
             List<ToDoList> list = grouped.getOrDefault(s, List.of());
@@ -156,31 +143,27 @@ public class ToDoList implements ToDoListFuncs {
                 list.stream()
                         .sorted(Comparator.comparingInt(t -> t.id))
                         .forEach(t -> System.out.println("ID: " + t.id + " | TASK: " + t.text + " | PRIO: " + t.priority + " | DEADLINE: " + t.deadline));
-
             }
         }
     }
 
     @Override
     public void update(int x) {
-        ToDoList t = tasks.get(indexById(x));
-
+        ToDoList t = TASKS.get(indexById(x));
         System.out.println("you chose to update " + t.text + " with the status of " + t.status);
-
         t.status = t.status.next();
-
         System.out.println("Updated to " + t.status);
     }
 
     @Override
     public void delete(int x) {
-        ToDoList removed = tasks.remove((indexById(x)));
+        ToDoList removed = TASKS.remove((indexById(x)));
         System.out.println("Deleted: " + removed.id + " - " + removed.text);
     }
 
     @Override
     public void updatePriority(int x) {
-        ToDoList t = tasks.get(indexById(x));
+        ToDoList t = TASKS.get(indexById(x));
 
         System.out.println("---------------");
         System.out.println(t.toString());
@@ -193,7 +176,7 @@ public class ToDoList implements ToDoListFuncs {
         System.out.println("2 is MEDIUM");
         System.out.println("3 is HIGH");
         System.out.println("Update new prio >>>");
-        int userInput = scanner.nextInt();
+        int userInput = SCANNER.nextInt();
         switch (userInput) {
             case 1:
                 t.priority = PRIORITY.LOW;
@@ -205,23 +188,18 @@ public class ToDoList implements ToDoListFuncs {
                 t.priority = PRIORITY.HIGH;
                 break;
         }
-
-        System.out.println("-----------");
-        System.out.println(t.priority);
-        System.out.println("-----------");
-
         System.out.println(t + " has been updated to " + t.priority + " priority");
     }
 
     @Override
     public STATUS updateStatus(int x) {
-        ToDoList t = tasks.get(indexById(x));
+        ToDoList t = TASKS.get(indexById(x));
         System.out.println("Current task has the prio of: " + t.status);
         System.out.println("1 is TODO");
         System.out.println("2 is IN_PROGRESS");
         System.out.println("3 is DONE");
         System.out.println("Update new status >>>");
-        int userInput = scanner.nextInt();
+        int userInput = SCANNER.nextInt();
         switch (userInput) {
             case 1:
                 t.status = STATUS.TODO;
@@ -242,7 +220,7 @@ public class ToDoList implements ToDoListFuncs {
         //TODO: display entire 'tasks'-array sorted by deadlines
         System.out.println("Sort array by deadlines");
 
-        tasks.stream()
+        TASKS.stream()
                 .sorted(Comparator.comparing(t -> t.deadline))
                 .forEach(t -> System.out.println(
                         t.id + ": " + t.text + " (deadline " + t.deadline.getDayOfMonth() + "/" + t.deadline.getDayOfMonth() + "/" + t.deadline.getYear() + ")"
@@ -254,7 +232,7 @@ public class ToDoList implements ToDoListFuncs {
         //TODO: display entire 'tasks'-array sorted by priorities
         System.out.println("Sort array by priorities");
 
-        tasks.stream()
+        TASKS.stream()
                 .sorted(Comparator.comparing((ToDoList t) -> t.priority).reversed())
                 .forEach(t -> System.out.println(
                         t.id + ": " + t.text + " | priority " + t.priority
@@ -264,10 +242,10 @@ public class ToDoList implements ToDoListFuncs {
     @Override
     public void checkForOldDeadlines() {
 
-        for (ToDoList t : tasks) {
+        for (ToDoList t : TASKS) {
             if (t.deadline.isBefore(LocalDateTime.now())) {
 
-                tasks.stream()
+                TASKS.stream()
                         .sorted(Comparator.comparing(y -> t.deadline.isBefore(LocalDateTime.now())))
                         .forEach(y -> System.out.println(
 
@@ -275,87 +253,30 @@ public class ToDoList implements ToDoListFuncs {
                         ));
             }
         }
-
     }
 
     @Override
     public void sortByPriorityThenDeadline() {
 
-        tasks.sort(Comparator
+        TASKS.sort(Comparator
                 .comparing(ToDoList::getPriority).reversed()
                 .thenComparing(ToDoList::getDeadline)
         );
 
-        for (ToDoList t : tasks) {
-
-
-            tasks.stream()
-                    .forEach(y -> System.out.println(
-                            "ID: " + t.id + " | " + t.text + " | DEADLINE " + t.deadline.getDayOfMonth() + "/" + t.deadline.getDayOfMonth() + "/" + t.deadline.getYear() + " | PRIO: " + t.priority
-                    ));
+        for (ToDoList t : TASKS) {
+            TASKS.forEach(y -> System.out.println(
+                    "ID: " + t.id + " | " + t.text + " | DEADLINE " + t.deadline.getDayOfMonth() + "/" + t.deadline.getDayOfMonth() + "/" + t.deadline.getYear() + " | PRIO: " + t.priority
+            ));
         }
 
-    }
-
-
-    public List<ToDoList> getTasks() {
-        return tasks;
-    }
-
-    public static int getCounter() {
-        return counter;
-    }
-
-    public static void setCounter(int counter) {
-        ToDoList.counter = counter;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getText() {
-        return text;
-    }
-
-    public void setText(String text) {
-        this.text = text;
-    }
-
-    public STATUS getStatus() {
-        return status;
-    }
-
-    public void setStatus(STATUS status) {
-        this.status = status;
     }
 
     public PRIORITY getPriority() {
         return priority;
     }
 
-    public void setPriority(PRIORITY priority) {
-        this.priority = priority;
-    }
-
     public LocalDateTime getDeadline() {
         return deadline;
-    }
-
-    public void setDeadline(LocalDateTime deadline) {
-        this.deadline = deadline;
-    }
-
-    public Scanner getScanner() {
-        return scanner;
-    }
-
-    public void setScanner(Scanner scanner) {
-        this.scanner = scanner;
     }
 }
 
