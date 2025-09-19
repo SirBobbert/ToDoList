@@ -1,5 +1,3 @@
-import org.w3c.dom.ls.LSOutput;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -35,16 +33,6 @@ public class ToDoList implements ToDoListFuncs {
         System.out.println("---- " + action.toUpperCase() + " ----");
     }
 
-    public void read() {
-        if (tasks.isEmpty()) {
-            System.out.println("(ingen opgaver)");
-            return;
-        }
-        for (ToDoList t : tasks) {
-            System.out.println(t.id + ": " + t.status + " - " + t.text + " " + t.priority + " - deadline: " + t.deadline);
-        }
-    }
-
     private int indexById(int id) {
         for (int i = 0; i < tasks.size(); i++) {
             if (tasks.get(i).id == id) {
@@ -55,9 +43,7 @@ public class ToDoList implements ToDoListFuncs {
     }
 
     public void chooseAction(int x) {
-        checkForOldDeadline();
-
-
+        checkForOldDeadlines();
         tasks.add(new ToDoList("Køb mælk", STATUS.TODO, PRIORITY.LOW, LocalDateTime.now().plusDays(1)));
         tasks.add(new ToDoList("Aflever rapport", STATUS.IN_PROGRESS, PRIORITY.HIGH, LocalDateTime.now().plusHours(6)));
         tasks.add(new ToDoList("Træn i fitness", STATUS.DONE, PRIORITY.MEDIUM, LocalDateTime.now().minusDays(2)));
@@ -101,30 +87,13 @@ public class ToDoList implements ToDoListFuncs {
                 readSortedPriorities();
             }
             case 8 -> {
-                checkForOldDeadline();
+                checkForOldDeadlines();
+            }
+            case 9 -> {
+                sortByPriorityThenDeadline();
             }
 
         }
-    }
-
-    private void checkForOldDeadline() {
-
-        for (ToDoList t : tasks) {
-            if (t.deadline.isBefore(LocalDateTime.now())) {
-
-                tasks.stream()
-                        .sorted(Comparator.comparing(y -> t.deadline.isBefore(LocalDateTime.now())))
-                        .forEach(y -> System.out.println(
-
-
-                                t.id + ": " + t.text + " (deadline " + t.deadline.getDayOfMonth() + "/" + t.deadline.getDayOfMonth() + "/" + t.deadline.getYear() + ")" + " | overskredet med " + t.deadline.compareTo(LocalDate.now().atStartOfDay()) + " dage"
-                        ));
-
-
-            }
-        }
-
-
     }
 
 
@@ -290,6 +259,103 @@ public class ToDoList implements ToDoListFuncs {
                 .forEach(t -> System.out.println(
                         t.id + ": " + t.text + " | priority " + t.priority
                 ));
+    }
+
+    @Override
+    public void checkForOldDeadlines() {
+
+        for (ToDoList t : tasks) {
+            if (t.deadline.isBefore(LocalDateTime.now())) {
+
+                tasks.stream()
+                        .sorted(Comparator.comparing(y -> t.deadline.isBefore(LocalDateTime.now())))
+                        .forEach(y -> System.out.println(
+
+                                t.id + ": " + t.text + " (deadline " + t.deadline.getDayOfMonth() + "/" + t.deadline.getDayOfMonth() + "/" + t.deadline.getYear() + ")" + " | overskredet med " + t.deadline.compareTo(LocalDate.now().atStartOfDay()) + " dage"
+                        ));
+            }
+        }
+
+    }
+
+    @Override
+    public void sortByPriorityThenDeadline() {
+
+        tasks.sort(Comparator
+                .comparing(ToDoList::getPriority).reversed()
+                .thenComparing(ToDoList::getDeadline)
+        );
+
+        for (ToDoList t : tasks) {
+
+
+            tasks.stream()
+                    .forEach(y -> System.out.println(
+                            "ID: " + t.id + " | " + t.text + " | DEADLINE " + t.deadline.getDayOfMonth() + "/" + t.deadline.getDayOfMonth() + "/" + t.deadline.getYear() + " | PRIO: " + t.priority
+                    ));
+        }
+
+    }
+
+
+    public List<ToDoList> getTasks() {
+        return tasks;
+    }
+
+    public static int getCounter() {
+        return counter;
+    }
+
+    public static void setCounter(int counter) {
+        ToDoList.counter = counter;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
+    public STATUS getStatus() {
+        return status;
+    }
+
+    public void setStatus(STATUS status) {
+        this.status = status;
+    }
+
+    public PRIORITY getPriority() {
+        return priority;
+    }
+
+    public void setPriority(PRIORITY priority) {
+        this.priority = priority;
+    }
+
+    public LocalDateTime getDeadline() {
+        return deadline;
+    }
+
+    public void setDeadline(LocalDateTime deadline) {
+        this.deadline = deadline;
+    }
+
+    public Scanner getScanner() {
+        return scanner;
+    }
+
+    public void setScanner(Scanner scanner) {
+        this.scanner = scanner;
     }
 }
 

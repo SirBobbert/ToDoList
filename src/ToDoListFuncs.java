@@ -14,4 +14,9 @@ public interface ToDoListFuncs {
     void readSortedDeadlines();
 
     void readSortedPriorities();
+
+    void checkForOldDeadlines();
+
+    void sortByPriorityThenDeadline();
 }
+
