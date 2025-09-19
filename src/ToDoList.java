@@ -1,3 +1,6 @@
+import org.w3c.dom.ls.LSOutput;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -52,6 +55,8 @@ public class ToDoList implements ToDoListFuncs {
     }
 
     public void chooseAction(int x) {
+        checkForOldDeadline();
+
 
         tasks.add(new ToDoList("Køb mælk", STATUS.TODO, PRIORITY.LOW, LocalDateTime.now().plusDays(1)));
         tasks.add(new ToDoList("Aflever rapport", STATUS.IN_PROGRESS, PRIORITY.HIGH, LocalDateTime.now().plusHours(6)));
@@ -95,7 +100,31 @@ public class ToDoList implements ToDoListFuncs {
             case 7 -> {
                 readSortedPriorities();
             }
+            case 8 -> {
+                checkForOldDeadline();
+            }
+
         }
+    }
+
+    private void checkForOldDeadline() {
+
+        for (ToDoList t : tasks) {
+            if (t.deadline.isBefore(LocalDateTime.now())) {
+
+                tasks.stream()
+                        .sorted(Comparator.comparing(y -> t.deadline.isBefore(LocalDateTime.now())))
+                        .forEach(y -> System.out.println(
+
+
+                                t.id + ": " + t.text + " (deadline " + t.deadline.getDayOfMonth() + "/" + t.deadline.getDayOfMonth() + "/" + t.deadline.getYear() + ")" + " | overskredet med " + t.deadline.compareTo(LocalDate.now().atStartOfDay()) + " dage"
+                        ));
+
+
+            }
+        }
+
+
     }
 
 
@@ -200,7 +229,7 @@ public class ToDoList implements ToDoListFuncs {
             case 1:
                 t.priority = PRIORITY.LOW;
                 break;
-                case 2:
+            case 2:
                 t.priority = PRIORITY.MEDIUM;
                 break;
             case 3:
@@ -255,7 +284,6 @@ public class ToDoList implements ToDoListFuncs {
     public void readSortedPriorities() {
         //TODO: display entire 'tasks'-array sorted by priorities
         System.out.println("Sort array by priorities");
-
 
         tasks.stream()
                 .sorted(Comparator.comparing((ToDoList t) -> t.priority).reversed())
